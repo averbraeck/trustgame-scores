@@ -14,12 +14,12 @@ public final class SessionUtils {
     }
 
     public static ScoreData getData(final HttpSession session) {
-        return (ScoreData) session.getAttribute("adminData");
+        return (ScoreData) session.getAttribute("scoreData");
     }
 
     public static boolean checkLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (request.getSession().getAttribute("userId") == null) {
-            response.sendRedirect("jsp/admin/login.jsp");
+            response.sendRedirect("jsp/scores/login.jsp");
             return false;
         }
         @SuppressWarnings("unchecked")
@@ -27,7 +27,7 @@ public final class SessionUtils {
                 .getAttribute("idSessionMap");
         String storedSessionId = idSessionMap.get(request.getSession().getAttribute("userId"));
         if (!request.getSession().getId().equals(storedSessionId)) {
-            response.sendRedirect("jsp/admin/login-session.jsp"); // TODO: session management
+            response.sendRedirect("jsp/scores/login-session.jsp"); // TODO: session management
             return false;
         }
         return true;

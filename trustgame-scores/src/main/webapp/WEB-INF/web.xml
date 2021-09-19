@@ -8,6 +8,6 @@
   <servlet>
     <servlet-name>trustgame-scores</servlet-name>
     <servlet-class>org.transsonic.trustgame.scores.UserLoginServlet</servlet-class>
-  </servlet>
+  </servlet> 
 
 </web-app>

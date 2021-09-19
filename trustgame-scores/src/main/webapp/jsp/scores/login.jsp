@@ -151,7 +151,7 @@ html, body {
     <div class="tg-login-body">
     
       <div class="tg-login-top-message">
-        <h1>Score Overview for the Trust Game</h1> 
+        <h1>Score Overview for the FreightBooking Game</h1> 
       </div>
 
       <div class="tg-login">

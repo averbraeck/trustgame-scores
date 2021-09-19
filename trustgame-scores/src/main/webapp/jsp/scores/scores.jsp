@@ -28,7 +28,7 @@
   <body onload="initPage()">
     <div class="tg-page">
       <div class="tg-header">
-        <span class="tg-freightbooking">TransSonic Trust Game</span>
+        <span class="tg-freightbooking">TransSonic FreightBooking Game</span>
         <span class="tg-slogan">Score Overview</span>
       </div>
       <div class="tg-header-right">
@@ -38,16 +38,13 @@
       </div>
       <div class="tg-header-game-user">
         <p>&nbsp;</p>
-        <p>User:&nbsp;&nbsp;&nbsp; ${scoresData.getUser().getName()}</p>
+        <p>User:&nbsp;&nbsp;&nbsp; ${scoreData.getUser().getName()}</p>
       </div>
 
       <div class="tg-body">
       
-        <div class="tg-scores-menu">
-          ${scoresData.getTopMenu()}
-        </div>
         <div class="tg-scores" id="tg-scores">
-          ${scoresData.getContentHtml()}
+          ${scoreData.getContentHtml()}
         </div>
         
       </div> <!-- tg-body -->
@@ -56,7 +53,7 @@
     
     <!-- modal window for the client information within an order -->
     
-    ${scoresData.getModalWindowHtml()}
+    ${scoreData.getModalWindowHtml()}
 
     <form id="clickForm" action="/trustgame-scores/scores" method="POST" style="display:none;">
       <input id="click" type="hidden" name="click" value="tobefilled" />

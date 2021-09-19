@@ -8,26 +8,26 @@ function initPage() {
   }
 }
 
-/* handle click on button */
-function clickMenu(button) {
-  document.getElementById("click").setAttribute("value", button);
-  document.getElementById("clickForm").submit();
+/* submit score form with selected game */
+function submitSelectGame() {
+  document.getElementById("clickType").setAttribute("value", "game");
+  document.getElementById("recordNr").setAttribute("value", document.getElementById("game").value);
+  document.getElementById("scoreForm").submit();
 }
 
-/* handle click on button with record number */
-function clickRecordId(button, recordId) {
-  document.getElementById("click").setAttribute("value", button);
-  document.getElementById("recordNr").setAttribute("value", recordId);
-  document.getElementById("clickForm").submit();
+/* submit score form with selected gameplay */
+function submitSelectGamePlay() {
+  document.getElementById("clickType").setAttribute("value", "gamePlay");
+  document.getElementById("recordNr").setAttribute("value", document.getElementById("gamePlay").value);
+  document.getElementById("scoreForm").submit();
 }
 
-/* submit edit form */
-function submitEditForm(click, recordNr) {
-  document.getElementById("editClick").setAttribute("value", click);
-  document.getElementById("editRecordNr").setAttribute("value", recordNr);
-  document.getElementById("editForm").submit();
+/* submit score form with selected game user */
+function submitSelectGameUser(recordNr) {
+  document.getElementById("clickType").setAttribute("value", "gameUser");
+  document.getElementById("recordNr").setAttribute("value", recordNr);
+  document.getElementById("scoreForm").submit();
 }
-
 
 /* create the preview for the image when a file is selected */
 function previewImage(event, imageId) 

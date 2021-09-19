@@ -42,7 +42,7 @@ public class UserLoginServlet extends HttpServlet {
         try {
             Context ctx = new InitialContext();
             try {
-                ctx.lookup("/trustgame-admin_datasource");
+                ctx.lookup("/trustgame-scores_datasource");
             } catch (NamingException ne) {
                 final HikariConfig config = new HikariConfig();
                 config.setJdbcUrl("jdbc:mysql://localhost:3306/trustgame");
@@ -51,7 +51,7 @@ public class UserLoginServlet extends HttpServlet {
                 config.setMaximumPoolSize(2);
                 config.setDriverClassName("com.mysql.cj.jdbc.Driver");
                 DataSource dataSource = new HikariDataSource(config);
-                ctx.bind("/trustgame-admin_datasource", dataSource);
+                ctx.bind("/trustgame-scores_datasource", dataSource);
             }
         } catch (NamingException e) {
             throw new ServletException(e);
@@ -91,6 +91,7 @@ public class UserLoginServlet extends HttpServlet {
             data.setUsername(user.getName());
             data.setUserId(user.getId());
             data.setUser(user);
+            ScoreServlet.fillInitialScreen(session, data);
             response.sendRedirect("jsp/scores/scores.jsp");
         } else {
             session.removeAttribute("scoreData");
