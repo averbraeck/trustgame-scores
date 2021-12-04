@@ -55,11 +55,6 @@
     
     ${scoreData.getModalWindowHtml()}
 
-    <form id="clickForm" action="/trustgame-scores/scores" method="POST" style="display:none;">
-      <input id="click" type="hidden" name="click" value="tobefilled" />
-      <input id="recordNr" type="hidden" name="recordNr" value="0" />
-    </form>
-
   </body>
 
 </html>

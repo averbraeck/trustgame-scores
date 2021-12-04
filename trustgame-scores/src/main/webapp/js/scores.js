@@ -29,6 +29,19 @@ function submitSelectGameUser(recordNr) {
   document.getElementById("scoreForm").submit();
 }
 
+/* submit sort click */
+function submitSort(sort) {
+  document.getElementById("clickType").setAttribute("value", "sort");
+  document.getElementById("sort").setAttribute("value", sort);
+  document.getElementById("scoreForm").submit();
+}
+
+/* submit refresh click */
+function submitRefresh() {
+  document.getElementById("clickType").setAttribute("value", "refresh");
+  document.getElementById("scoreForm").submit();
+}
+
 /* create the preview for the image when a file is selected */
 function previewImage(event, imageId) 
 {

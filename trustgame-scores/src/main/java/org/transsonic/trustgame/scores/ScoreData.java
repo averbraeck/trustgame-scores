@@ -60,6 +60,12 @@ public class ScoreData {
     /** the selected gameUser. */
     private int selectedGameUserId = 0;
     
+    /** the sort criterion. */
+    private String sort = "Date";
+    
+    /** the sort direction. */
+    private boolean sortDown = true;
+    
     /**
      * when 0, do not show popup; when 1: show popup. <br>
      * filled and updated by RoundServlet.
@@ -161,6 +167,22 @@ public class ScoreData {
 
     public void setSelectedGameUserId(int selectedGameUser) {
         this.selectedGameUserId = selectedGameUser;
+    }
+
+    public String getSort() {
+        return sort;
+    }
+
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
+
+    public boolean isSortDown() {
+        return sortDown;
+    }
+
+    public void setSortDown(boolean sortDown) {
+        this.sortDown = sortDown;
     }
 
 }

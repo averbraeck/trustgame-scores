@@ -1,6 +1,8 @@
 package org.transsonic.trustgame.scores;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -80,6 +82,8 @@ public class ScoreServlet extends HttpServlet {
         }
 
         case "gamePlay": {
+            data.setSort("Date");
+            data.setSortDown(true);
             data.setSelectedGamePlayId(recordNr);
             data.setSelectedGameUserId(0);
             StringBuilder s = new StringBuilder();
@@ -109,6 +113,36 @@ public class ScoreServlet extends HttpServlet {
             break;
         }
 
+        case "refresh": {
+            StringBuilder s = new StringBuilder();
+            s.append(startForm());
+            s.append(startPickTable());
+            s.append(makeGamePicklist(session, data));
+            s.append(makeGamePlayPicklist(session, data));
+            s.append(endPickTable());
+            s.append(makeScoreTable(session, data));
+            s.append(endForm());
+            data.setContentHtml(s.toString());
+            break;
+        }
+
+        case "sort": {
+            String sort = "";
+            if (request.getParameter("sort") != null)
+                sort = request.getParameter("sort");
+            toggleSort(data, sort);
+            StringBuilder s = new StringBuilder();
+            s.append(startForm());
+            s.append(startPickTable());
+            s.append(makeGamePicklist(session, data));
+            s.append(makeGamePlayPicklist(session, data));
+            s.append(endPickTable());
+            s.append(makeScoreTable(session, data));
+            s.append(endForm());
+            data.setContentHtml(s.toString());
+            break;
+        }
+
         default:
             break;
         }
@@ -116,11 +150,21 @@ public class ScoreServlet extends HttpServlet {
         response.sendRedirect("jsp/scores/scores.jsp");
     }
 
+    private static void toggleSort(ScoreData data, String sort) {
+        if (sort.equals(data.getSort())) {
+            data.setSortDown(!data.isSortDown());
+            return;
+        }
+        data.setSort(sort);
+        data.setSortDown(true);
+    }
+
     public static String startForm() {
         StringBuilder s = new StringBuilder();
         s.append("<div class=\"tg-form\">\n");
         s.append("  <form id=\"scoreForm\" action=\"/trustgame-scores/scores\" method=\"POST\" >\n");
         s.append("    <input id=\"clickType\" type=\"hidden\" name=\"clickType\" value=\"tobefilled\" />\n");
+        s.append("    <input id=\"sort\" type=\"hidden\" name=\"sort\" value=\"Date\" />\n");
         s.append("    <input id=\"recordNr\" type=\"hidden\" name=\"recordNr\" value=\"0\" />\n");
         s.append("    <fieldset>\n");
         return s.toString();
@@ -216,21 +260,65 @@ public class ScoreServlet extends HttpServlet {
 
         s.append("\n<br>&nbsp;<br><div class=\"tg-users-score\">\n");
         s.append("  <table width=\"100%\" style=\"border:none; padding:0px; margin:0px;\">\n");
-        s.append("   <tr><td width=\"40%\" style=\"border:none; padding:0px; margin:0px;\">\n");
+        s.append("   <tr><td width=\"50%\" style=\"border:none; padding:0px; margin:0px;\">\n");
+        s.append("      <a href=\"#\" onClick=\"submitRefresh()\"; return false;\">Refresh</a>\n");
+        s.append("   </td><td style=\"border:none; padding:0px; margin:0px;\">&nbsp;</td></tr>\n");
+        s.append("   <tr><td width=\"50%\" style=\"border:none; padding:0px; margin:0px;\">\n");
         s.append("    <div class=\"tg-scores-line-table\">");
         s.append("       <table width=\"90%\">\n");
         s.append("          <thead>\n");
         s.append("            <tr>\n");
-        s.append("              <td align=\"left\">Name</td>\n");
-        s.append("              <td align=\"left\">Code</td>\n");
-        s.append("              <td align=\"center\">Played</td>\n");
-        s.append("              <td align=\"center\">Profit</td>\n");
-        s.append("              <td align=\"center\">Satisfaction</td>\n");
-        s.append("              <td align=\"center\">Sustainability</td>\n");
+        appendSortHeader(data, s, "left", "Name");
+        appendSortHeader(data, s, "left", "Date");
+        appendSortHeader(data, s, "center", "Played");
+        appendSortHeader(data, s, "center", "Round");
+        appendSortHeader(data, s, "center", "Profit");
+        appendSortHeader(data, s, "center", "Satisf");
+        appendSortHeader(data, s, "center", "Sustain");
         s.append("            </tr>\n");
         s.append("          </thead>\n");
         s.append("          <tbody>\n");
+
+        // sort the data
+        SortedMap<String, GameuserRecord> sortedRecords = data.isSortDown() ? new TreeMap<>()
+                : new TreeMap<>(Collections.reverseOrder());
+        int unique = 0;
         for (GameuserRecord gameUser : gameUserRecords) {
+            UserRecord user = SqlUtils.readUserFromUserId(data, gameUser.getUserId());
+            String key = "";
+            switch (data.getSort()) {
+            case "Name":
+                key = user.getUsername();
+                break;
+            case "Date":
+                if (user.getCreatetime() == null)
+                    key = "-";
+                else
+                    key = user.getCreatetime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm"));
+                break;
+            case "Played" :
+                key = userHasPlayed(data, gameUser) ? "Y" : "N";
+                break;
+            case "Round" :
+                key = String.format("%05d", gameUser.getRoundnumber().intValue());
+                break;
+            case "Profit" :
+                key = String.format("%05d", gameUser.getScoreprofit());
+                break;
+            case "Satisf" :
+                key = String.format("%05d", gameUser.getScoresatisfaction());
+                break;
+            case "Sustain" :
+                key = String.format("%05d", gameUser.getScoresustainability());
+                break;
+            default:
+                break;
+            }
+            sortedRecords.put(key + String.format("%08d", unique++), gameUser);
+        }
+
+        // display the table
+        for (GameuserRecord gameUser : sortedRecords.values()) {
             s.append("            <tr>\n");
             s.append("              <td align=\"left\">");
             UserRecord user = SqlUtils.readUserFromUserId(data, gameUser.getUserId());
@@ -246,10 +334,16 @@ public class ScoreServlet extends HttpServlet {
             s.append("                </span>\n"); // tg-scores-line
             s.append("</td>\n");
             s.append("              <td align=\"left\">");
-            s.append(user.getUsercode());
+            if (user.getCreatetime() == null)
+                s.append("-");
+            else
+                s.append(user.getCreatetime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")));
             s.append("</td>\n");
             s.append("              <td align=\"center\">");
             s.append(userHasPlayed(data, gameUser) ? "Y" : "N");
+            s.append("</td>\n");
+            s.append("              <td align=\"center\">");
+            s.append(gameUser.getRoundnumber());
             s.append("</td>\n");
             s.append("              <td align=\"center\">");
             s.append(gameUser.getScoreprofit());
@@ -273,17 +367,35 @@ public class ScoreServlet extends HttpServlet {
         return s.toString();
     }
 
+    private static void appendSortHeader(ScoreData data, StringBuilder s, String pos, String name) {
+        s.append("              <td align=\"");
+        s.append(pos);
+        s.append("\">");
+        s.append("<a href=\"#\" onClick=\"submitSort('");
+        s.append(name);
+        s.append("'); return false;\">");
+        s.append(name);
+        s.append("</a>");
+        if (data.getSort().equals(name)) {
+            if (data.isSortDown())
+                s.append("&nbsp;&darr;");
+            else
+                s.append("&nbsp;&uarr;");
+        }
+        s.append("</td>\n");
+    }
+
     public static String makeDetailedScoreTable(HttpSession session, ScoreData data) {
-        
+
         StringBuilder s = new StringBuilder();
-        
+
         if (data.getSelectedGameUserId() == 0) {
             s.append("   <td style=\"border:none; padding:0px; margin:0px;\">No selected user</td></tr>\n");
             s.append("  </table>\n"); // outer 2-column table
             s.append("</div>\n"); // tg-users-score
             return s.toString();
         }
-        
+
         DSLContext dslContext = DSL.using(data.getDataSource(), SQLDialect.MYSQL);
         GameuserRecord gameUser = dslContext.selectFrom(Tables.GAMEUSER)
                 .where(Tables.GAMEUSER.ID.eq(data.getSelectedGameUserId())).fetchAny();
@@ -318,7 +430,8 @@ public class ScoreServlet extends HttpServlet {
         s.append("\n<div class=\"tg-detail-score\">\n");
         s.append("  <table width=\"100%\">\n");
         s.append("    <thead><tr><td align=\"center\">Round</td><td align=\"center\">Order</td><td>Chosen Carrier</td>"
-                + "<td align=\"center\">Profit</td><td align=\"center\">Satisfaction</td>" + "<td align=\"center\">Sustainability</td></tr></thead>\n");
+                + "<td align=\"center\">Profit</td><td align=\"center\">Satisfaction</td>"
+                + "<td align=\"center\">Sustainability</td></tr></thead>\n");
         s.append("    <tbody>\n");
 
         s.append("           <tr><td align=\"center\">Start</td><td>&nbsp;</td><td>&nbsp;</td><td align=\"center\">");
